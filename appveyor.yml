@@ -15,29 +15,29 @@ environment:
 
     matrix:
 
-    - PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7.x" # currently 2.7.10
-      PYTHON_ARCH: "32"
+#   - PYTHON: "C:\\Python27"
+#     PYTHON_VERSION: "2.7.x" # currently 2.7.11
+#     PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python27-x64"
-      PYTHON_VERSION: "2.7.x" # currently 2.7.10
-      PYTHON_ARCH: "64"
+#   - PYTHON: "C:\\Python27-x64"
+#     PYTHON_VERSION: "2.7.x" # currently 2.7.11
+#     PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4.x" # currently 3.4.3
-      PYTHON_ARCH: "32"
+#   - PYTHON: "C:\\Python34"
+#     PYTHON_VERSION: "3.4.x" # currently 3.4.3
+#     PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python34-x64"
       PYTHON_VERSION: "3.4.x" # currently 3.4.3
       PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5.x" # currently 3.5.0
-      PYTHON_ARCH: "32"
+#   - PYTHON: "C:\\Python35"
+#     PYTHON_VERSION: "3.5.x" # currently 3.5.1
+#     PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python35-x64"
-      PYTHON_VERSION: "3.5.x" # currently 3.5.0
-      PYTHON_ARCH: "64"
+#   - PYTHON: "C:\\Python35-x64"
+#     PYTHON_VERSION: "3.5.x" # currently 3.5.1
+#     PYTHON_ARCH: "64"
 
 install:
   - cmd: echo "Filesystem root:"
@@ -55,17 +55,16 @@ install:
   - python --version
   - python -c "import struct; print(struct.calcsize('P') * 8)"
 
-  # Pin pip to 7.1.2 to avoid new binary API tags for Windows
-  - python -m pip install pip==7.1.2
-
-  # Install the build dependencies of the project. If some dependencies contain
-  # compiled extensions and are not provided as pre-built wheel packages,
-  # pip will build them from source using the MSVC compiler matching the
-  # target Python version and architecture
   - pip install -r requirements.txt
+  # Pin wheel to 0.26 to avoid Windows ABI tag for built wheel
+  - pip install wheel==0.26
   - git clone https://github.com/numpy/numpy.git
 
 build_script:
+  # Fix MSVC builds for 64-bit Python
+  # See
+  # http://stackoverflow.com/questions/32091593/cannot-install-windows-sdk-7-1-on-windows-10
+  - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64/vcvars64.bat"
   # Build and install the wheel
   - cd numpy
   - git checkout %NP_VERSION%
